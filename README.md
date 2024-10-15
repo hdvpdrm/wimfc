@@ -9,3 +9,6 @@ g++ -o wimfc -std=c++14 main.cpp
 chmod +x wimfc
 ./wimfc
 ```
+
+# About python script
+I have written it just for fun.
