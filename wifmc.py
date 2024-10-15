@@ -5,7 +5,7 @@
 
 import os
 import sys
-
+import argparse
 
 #script works only for fish shell and you won't run it under Windows
 if os.name != "posix":
@@ -15,7 +15,13 @@ if "fish" not in os.environ["SHELL"]:
     print("wifmc error: script is suitable for fish only!")
     sys.exit(-1)
 
-
+#parse CLI arguments
+parser = argparse.ArgumentParser(prog="wifmc",
+                                 description="Retrives the most frequent used command in fish shell",
+                                 epilog="it is all about fun")
+parser.add_argument("-c","--top",nargs="?",const=1,type=int,default=1,help="set the amount of commands that should be shown. Default is 1")
+parser.add_argument("-s","--show-frequency",help="show the frequency of command. Don't do it by default",default=False,action="store_true")
+args = parser.parse_args()
 
 def get_history() -> str:
     '''returns the content of history file'''
@@ -89,5 +95,10 @@ def count_appearence_freq(commands: list[str]) -> dict:
 items = count_appearence_freq(
     get_list_of_commands(
         get_history()))
+sorted_items = sorted(items.items(),key=lambda kv:(kv[1],kv[0]),reverse=True)
 
-print(max(items,key=items.get))
+for i, item in enumerate(sorted_items):
+    name, freq = item
+    optional = freq if args.show_frequency else ""
+    print("{} {} ".format(name,optional))
+    if i == args.top-1: break
