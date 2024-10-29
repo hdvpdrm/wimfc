@@ -10,13 +10,6 @@
 #include<stdio.h>
 #include <sys/stat.h>
 
-std::string get_home()
-{
-  auto home = std::getenv("HOME");
-  if(home == nullptr) return "";
-
-  return home;
-}
 bool does_file_exist(const std::string& filename)
 {
     struct stat buffer;
@@ -24,7 +17,7 @@ bool does_file_exist(const std::string& filename)
 }
 std::string get_fish_history_path()
 {
-  auto home = get_home();
+  std::string home = std::getenv("HOME");
   if(home.empty())
     {
       printf("%s\n","wimfc error: Failed to obtain home directory path!");
@@ -40,15 +33,16 @@ std::string get_fish_history_path()
   return home;
 }
 
-std::list<std::string> split_string(const std::string& str, char delimiter) {
+std::list<std::string> split_string(const std::string& str, char delimiter)
+{
   std::list<std::string> tokens;
   std::string token;
   std::istringstream tokenStream(str);
 
   while (std::getline(tokenStream, token, delimiter))
     {
-    tokens.push_back(token);
-  }
+      tokens.push_back(token);
+    }
 
   return tokens;
 }
@@ -56,23 +50,21 @@ std::list<std::string> read_history(const std::string& history_path)
 {
   std::list<std::string> history;
   std::ifstream hist_file(history_path);
-  if(hist_file.is_open())
+  if(!hist_file.is_open())
     {
-      std::string line;
-      while(std::getline(hist_file,line))
-	{
-	  if(line.find("cmd") != std::string::npos)
-	    {
-	      line = line.substr(7);
-	      line = line.substr(0,line.find(' '));
-	      history.push_back(line);
-	    }
-	}
+     printf("%s\n","wimfc error: Failed to open history file!");
+      exit(-1); 
     }
-  else
+
+  std::string line;
+  while(std::getline(hist_file,line))
     {
-      printf("%s\n","wimfc error: Failed to open history file!");
-      exit(-1);
+      if(line.find("cmd") != std::string::npos)
+	{
+	  line = line.substr(7);
+	  line = line.substr(0,line.find(' '));
+	  history.push_back(line);
+	}
     }
   return history;
 }
